@@ -61,8 +61,8 @@ int main() {
             //       downloadFromDevice()
             for(int k = 0; k < N; k++){
                 reg.applyGateResident(H, k % target_count);
-                reg.downloadFromDevice();
             }
+            reg.downloadFromDevice();
 
             cudaEventRecord(stop);
             cudaEventSynchronize(stop);
