@@ -59,7 +59,7 @@ int main() {
             // TODO: uploadToDevice()
             //       loop N times: applyGateResident(H, k % target_count)
             //       downloadFromDevice()
-            for(int i = 0; i < N; i++){
+            for(int k = 0; k < N; k++){
                 reg.applyGateResident(H, k % target_count);
                 reg.downloadFromDevice();
             }
