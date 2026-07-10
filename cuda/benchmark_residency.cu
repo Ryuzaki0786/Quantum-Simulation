@@ -41,9 +41,9 @@ int main() {
 
             // TODO: loop N times, each iteration calls applyGateToQubitCUDA
             //       with target = (k % target_count)
-            for(int i = 0; i < N; i++)
+            for(int k = 0; k < N; k++)
             {
-                applyGatetoQubitCUDA(H, k % target_count);
+                reg.applyGateToQubitCUDA(H, k % target_count);
             }
 
             cudaEventRecord(stop);
@@ -55,13 +55,13 @@ int main() {
         {
             QuantumRegister reg(n);
             cudaEventRecord(start);
-
+            reg.uploadToDevice();
             // TODO: uploadToDevice()
             //       loop N times: applyGateResident(H, k % target_count)
             //       downloadFromDevice()
             for(int i = 0; i < N; i++){
-                applyGateResident(H, k % target_count);
-                downloadFromDevice();
+                reg.applyGateResident(H, k % target_count);
+                reg.downloadFromDevice();
             }
 
             cudaEventRecord(stop);
