@@ -58,6 +58,10 @@ namespace quantum {
 
             void print() const;
 
+            void uploadToDevice();                                    // malloc + copy-up, once
+            void applyGateResident(const Matrix<Complex>& gate, int target);  // launch only
+            void downloadFromDevice();                                // copy-down + free, once
+
             double probabilityZero(int target) const;
 
             const Vector<Complex>& state() const {return state_; }
@@ -66,6 +70,11 @@ namespace quantum {
         private:
             int n_qubits_;
             Vector<Complex> state_;
+
+            double* d_re_ = nullptr; // resident device real parts
+            double* d_im_ = nullptr; //resident device imag parts
+            bool on_device = false; //is the state currently resident on the GPU ?
+
     };
 
     QuantumRegister :: QuantumRegister(int n)
@@ -220,7 +229,69 @@ namespace quantum {
             for (int i = 0; i < N; i++)
                 state_(i) = Complex(re[i], im[i]);
         }
+    void QuantumRegister :: uploadToDevice(){
+        int N = size();
+
+        std::vector<double> re(N), im(N);
+        for(int i = 0; i < N; i++){
+            re[i] = state_(i).real();
+            im[i] = state_(i).imag();
+        }
+
+        size_t bytes =  static_cast<size_t>(N) * sizeof(double);
+        cudaMalloc(&d_re_,bytes);
+        cudaMalloc(&d_im_,bytes);
+
+        cudaMemcpy(d_re_, re.data(), bytes, cudaMemcpyHostToDevice);
+        cudaMemcpy(d_im_, im.data(), bytes, cudaMemcpyHostToDevice);
+
+        on_device_ = true;
+
+    }
+
+    void QuantumRegister :: applyGateResident(const Matrix<Complex>& gate, int target){
+        if(!on_device_){
+            throw std::runtime_error("must call uploadToDevice() before applyGateResident()");
+        }
+
+        int N = size();
+        int bit = 1 << target;
+
+        double g00r = gate(0,0).real(), g00i = gate(0,0).imag();
+        double g01r = gate(0,1).real(), g01i = gate(0,1).imag();
+        double g10r = gate(1,0).real(), g10i = gate(1,0).imag();
+        double g11r = gate(1,1).real(), g11i = gate(1,1).imag();
+
+        int threads = 256;
+        int blocks = (N + threads - 1) / threads;
+
+        applyGateKernel<<<blocks, threads>>>(d_re_, d_im_, N, bit,
+                g00r, g00i, g01r, g01i, g10r, g10i, g11r, g11i);
+
+    }
+
+    void QuantumRegister:: downloadFromDevice(){
+        int N = size();
+        std::vector<double> re(N), im(N);
+
+        cudaDeviceSynchronize();
+
+        size_t bytes =  static_cast<size_t>(N) * sizeof(double);
+        cudaMemcpy(re.data(), d_re_, bytes, cudaMemcpyDeviceToHost);
+        cudaMemcpy(im.data(), d_im_, bytes, cudaMemcpyDeviceToHost);
+
+        for (int i = 0; i < N; i++)
+            state_(i) = Complex(re[i], im[i]);
+
+        cudaFree(d_re_);
+        cudaFree(d_im_);
+        d_re_ = nullptr;
+        d_im_ = nullptr;
+        on_device_ = false;
+    }
     #endif
+
+    
 
 }
 
