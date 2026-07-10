@@ -1,5 +1,5 @@
-#include "../quantum_register.h"
-#include "../matrix.h"
+#include "../include/quantum_register.h"
+#include "../include/matrix.h"
 #include <cstdio>
 #include <cmath>
 #include <vector>
@@ -41,6 +41,10 @@ int main() {
 
             // TODO: loop N times, each iteration calls applyGateToQubitCUDA
             //       with target = (k % target_count)
+            for(int i = 0; i < N; i++)
+            {
+                applyGatetoQubitCUDA(H, k % target_count);
+            }
 
             cudaEventRecord(stop);
             cudaEventSynchronize(stop);
@@ -55,6 +59,10 @@ int main() {
             // TODO: uploadToDevice()
             //       loop N times: applyGateResident(H, k % target_count)
             //       downloadFromDevice()
+            for(int i = 0; i < N; i++){
+                applyGateResident(H, k % target_count);
+                downloadFromDevice();
+            }
 
             cudaEventRecord(stop);
             cudaEventSynchronize(stop);
