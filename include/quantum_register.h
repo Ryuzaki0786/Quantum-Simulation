@@ -73,7 +73,7 @@ namespace quantum {
 
             double* d_re_ = nullptr; // resident device real parts
             double* d_im_ = nullptr; //resident device imag parts
-            bool on_device = false; //is the state currently resident on the GPU ?
+            bool on_device_ = false; //is the state currently resident on the GPU ?
 
     };
 
