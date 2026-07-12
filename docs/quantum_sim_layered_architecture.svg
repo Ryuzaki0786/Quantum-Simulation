@@ -1,0 +1,65 @@
+<svg width="100%" viewBox="0 0 680 420" role="img" xmlns="http://www.w3.org/2000/svg" font-family="'Anthropic Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+<title>Layered architecture of the quantum-sim project</title>
+<desc>Four tiers: a performance layer on top, an applications tier, a numerical-methods tier, and a shared linear-algebra core at the bottom. Classical PDEs and the Schrodinger solver depend on the PDE integrators (Crank-Nicolson); the quantum circuit simulator depends directly on the linear-algebra core, bypassing the PDE layer. ODE steppers are standalone.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+</defs>
+
+<!-- Performance layer (full width, amber) -->
+<rect x="70" y="40" width="540" height="48" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/>
+<text x="340" y="58" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#633806">Performance layer</text>
+<text x="340" y="74" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#854F0B">OpenMP + CUDA — both done · 95.9x residency speedup at 256 gates</text>
+<line x1="340" y1="88" x2="340" y2="116" stroke="#898781" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- Applications tier (three boxes) -->
+<!-- Classical PDEs (teal, connected) -->
+<rect x="70" y="120" width="160" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="150" y="138" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">Classical PDEs</text>
+<text x="150" y="156" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">wave, heat</text>
+
+<!-- Schrodinger solver (teal, connected) -->
+<rect x="250" y="120" width="160" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="330" y="138" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">Schrödinger solver</text>
+<text x="330" y="156" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">time-dependent, 1D</text>
+
+<!-- Quantum circuit sim (teal, connected) -->
+<rect x="430" y="120" width="180" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="520" y="138" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">Quantum circuit sim</text>
+<text x="520" y="156" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">qubit, gate, register</text>
+
+<!-- Numerical-methods tier -->
+<!-- PDE integrators (teal, connected) -->
+<rect x="70" y="210" width="340" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="240" y="228" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">PDE integrators</text>
+<text x="240" y="246" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">leapfrog, Crank-Nicolson</text>
+
+<!-- ODE steppers (gray, standalone) -->
+<rect x="430" y="210" width="180" height="56" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="520" y="228" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#444441">ODE steppers</text>
+<text x="520" y="246" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#5F5E5A">euler, rk4 — standalone</text>
+
+<!-- Linear algebra core (full width, teal) -->
+<rect x="70" y="300" width="540" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="340" y="318" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">Linear algebra core</text>
+<text x="340" y="336" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">vector.h, matrix.h, LU</text>
+
+<!-- Dependency arrows -->
+<!-- Classical PDEs -> PDE integrators -->
+<line x1="150" y1="176" x2="150" y2="208" stroke="#898781" stroke-width="1.5" marker-end="url(#arrow)"/>
+<!-- Schrodinger -> PDE integrators -->
+<line x1="330" y1="176" x2="330" y2="208" stroke="#898781" stroke-width="1.5" marker-end="url(#arrow)"/>
+<!-- Quantum circuit sim -> LA core directly (routes through the gap between PDE integrators and ODE steppers) -->
+<path d="M470 176 L470 190 L420 190 L420 298" fill="none" stroke="#898781" stroke-width="1.5" marker-end="url(#arrow)"/>
+<!-- PDE integrators -> LA core -->
+<line x1="240" y1="266" x2="240" y2="298" stroke="#898781" stroke-width="1.5" marker-end="url(#arrow)"/>
+<!-- ODE steppers -> LA core -->
+<line x1="520" y1="266" x2="520" y2="298" stroke="#898781" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- Legend -->
+<rect x="70" y="388" width="12" height="12" rx="3" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="88" y="398" font-size="12" fill="#52514E">connected spine</text>
+<rect x="220" y="388" width="12" height="12" rx="3" fill="#F1EFE8" stroke="#5F5E5A"/>
+<text x="238" y="398" font-size="12" fill="#52514E">standalone</text>
+<rect x="350" y="388" width="12" height="12" rx="3" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="368" y="398" font-size="12" fill="#52514E">performance layer</text>
+</svg>
